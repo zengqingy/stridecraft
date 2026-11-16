@@ -1,0 +1,14 @@
+# Stridecraft project rules
+- Use plain HTML/CSS/JS only. No framework, bundler, server, or build step.
+- Pages: index.html, products.html, product-detail.html, philosophy.html, service.html, faq.html, order.html, admin.html.
+- Shared data/renderers: src/js/store.js; interactions: src/js/site.js; admin UI: src/admin.js; styles: src/css/site.css.
+- Persist site data in localStorage key stridecraft_site_v1. Images use IndexedDB refs (idb:<id>) or remote URLs; bundled SVG defaults are allowed. Backup export/import embeds uploaded images.
+- Default admin passphrase 8888, with sessionStorage authentication. All pages share store.js. This client-side gate is a convenience, not security.
+- Supply 10 default products, each with id, name, subtitle, price, desc, points, specs, colors, model (GLB path), imageSlots.
+- Never invent medical claims, certifications, or real testimonials. Label demo content clearly.
+- No animation or 3D in this phase. Future model slots without GLB must use procedural Three.js walker primitives and retain a visible SVG poster behind the canvas.
+- Never emit an image with empty src or a broken URL. Scene images use fixed-seed picsum.photos URLs, local assets/img/fallback.svg on error, lazy loading except hero.
+- Each product has a line-art SVG under assets/img/products/<id>.svg, under 8KB. Include assets/img/logo.svg and favicon.svg.
+- Keep navigation consistent; mark the active page with aria-current="page".
+- Validate image resolution, cross-page product edits, booking persistence, and embedded-image backups before completion.
+- Do not start a local server. Open static files directly for verification. Commit and push requested changes.
