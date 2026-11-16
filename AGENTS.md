@@ -6,7 +6,7 @@
 - Default admin passphrase 8888, with sessionStorage authentication. All pages share store.js. This client-side gate is a convenience, not security.
 - Supply 10 default products, each with id, name, subtitle, price, desc, points, specs, colors, model (GLB path), imageSlots.
 - Never invent medical claims, certifications, or real testimonials. Label demo content clearly.
-- No animation or 3D in this phase. Future model slots without GLB must use procedural Three.js walker primitives and retain a visible SVG poster behind the canvas.
+- Phase 2 permits GSAP motion and Three.js viewers. Respect reduced motion; no mobile pinning. Model slots without GLB use procedural walker primitives with a visible SVG poster behind the canvas. Keep store.js data shape and admin behavior unchanged.
 - Never emit an image with empty src or a broken URL. Scene images use fixed-seed picsum.photos URLs, local assets/img/fallback.svg on error, lazy loading except hero.
 - Each product has a line-art SVG under assets/img/products/<id>.svg, under 8KB. Include assets/img/logo.svg and favicon.svg.
 - Keep navigation consistent; mark the active page with aria-current="page".

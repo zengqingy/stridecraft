@@ -20,5 +20,5 @@
 | walker-09 / main（产品卡片、详情；前 3 款亦用于首页） | `assets/img/products/walker-09.svg` |
 | walker-10 / main（产品卡片、详情；前 3 款亦用于首页） | `assets/img/products/walker-10.svg` |
 
-所有产品 model 字段为空。本阶段无 canvas、无 Three.js、无 3D，也无动画；产品 SVG 为可见静态展示。
+所有产品 model 字段默认为空。Phase 2 以 Three.js 基础几何体显示助行器，SVG 仍作为画布后的 poster，加载失败时完全显示。首页特色区、10 款列表卡片与详情页复用对应产品 main 槽位；没有新增数据字段。首页氛围图片槽位保留供后台与备份使用，Phase 2 全屏文字 Hero 不渲染此照片。
 所有产品 SVG 小于 8KB。氛围照片为固定 seed 的演示照片，不代表产品或品牌实拍。

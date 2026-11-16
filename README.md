@@ -13,7 +13,7 @@
 
 数据保存在 localStorage 的 stridecraft_site_v1。管理登录保存在 sessionStorage。所有页面须处于相同站点来源；浏览器对直接打开 file:// 文件的存储和读取规则不同。发布到静态托管（例如 GitHub Pages）可获得一致的同源存储行为。本项目不包含服务器。清除浏览器数据会丢失咨询与上传图片，请先备份。
 
-网站文字、价格、产品线稿及规格为演示内容，无医疗、认证或真实评价声明。产品尚未提供 GLB，本阶段按要求不启用 3D。未来启用时必须保留 SVG poster，并在无 GLB 时使用 Three.js 基础几何体。
+网站文字、价格、产品线稿及规格为演示内容，无医疗、认证或真实评价声明。产品尚未提供 GLB，Phase 2 已使用 Three.js 基础几何体显示概念助行器，并在画布后保留 SVG poster；GLB 加载失败或 WebGL 不可用时显示 poster。
 
 图片完整清单见 [IMAGE-SLOTS.md](IMAGE-SLOTS.md)。开发约定见 [AGENTS.md](AGENTS.md)。
 
@@ -28,3 +28,13 @@
 - 三个 JS 文件通过 node --check；无浏览器未捕获异常。
 
 测试来源的演示改名与咨询已清理；测试浏览器为独立临时环境。未验证 file:// 模式（环境浏览器策略禁止），未部署 GitHub Pages。
+
+## Phase 2：3D 与滚动叙事
+
+首页顺序：全屏 Hero → 三步固定滚动 3D → 10 款产品网格 → 理念 → 页尾咨询 CTA。桌面模型由正面转到 45°、90°；手机与减少动态效果模式固定 45°，不固定滚动、不使用擦洗。减少动态效果模式也跳过 Hero 与卡片动画。
+
+`src/js/viewer.js` 导出 `createViewer(canvas, modelPath, options)`，返回 `rotateTo(radians)`、`setColor(cssColor)` 与 `dispose()`。可选参数 angle、color、interactive。距离视口 200px 内初始化；离视口 900px 外释放，列表最多三个活跃 WebGL 上下文。被回收的画布保留 SVG，下一次进入观察区域时可重新初始化。详情页支持拖动、配色和按钮切换角度。GLB 路径继续来自原有 model 字段，数据形状与后台逻辑未改变。
+
+运行库固定版本随 src/vendor 保存，不需要安装依赖。字体使用 Google Fonts 的 Noto Serif SC / Noto Sans SC，网络不可用时使用系统回退字体。
+
+开发验证：已有 Playwright 与 Chromium 的环境中执行 `node tests/phase2.cjs`。测试通过浏览器拦截响应读取本地文件，不启动服务器；测试桌面固定、手机无固定、减少动态效果、基础几何体、GLB 404 回退、WebGL 不可用、三个上下文上限，以及后台改名/咨询回归。测试没有实际生产 GLB；未来真实模型还需检查材质、比例与外部纹理。store.js 与 src/admin.js 保持原样。
