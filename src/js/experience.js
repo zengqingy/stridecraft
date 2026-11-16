@@ -17,7 +17,7 @@ function mount(container, product, interactive = true) {
   canvas.setAttribute('role', 'img');
   canvas.setAttribute('aria-label',interactive?'可拖动的产品三维示意':'产品三维概念示意');
   canvas.tabIndex = interactive ? 0 : -1;
-  const description = document.createElement('p'); description.className = 'viewer-description muted';
+  const description = document.createElement('p'); description.className = 'viewer-description sr-only';
   description.id = 'viewer-description-' + document.querySelectorAll('.viewer-description').length;
   description.textContent = interactive ? '概念三维示意：拖动旋转，双指缩放，双击或双触重置。也可使用下方按钮观察与重置；不代表实物规格。' : '概念助行器三维示意；不可交互，不代表实物规格。无法显示三维时保留产品线稿。';
   canvas.setAttribute('aria-describedby', description.id); container.append(description);
@@ -29,22 +29,23 @@ function setup() {
   if (!S) return;
   let featured;
   if (page === 'index' && S.data.products[0]) featured = mount(document.querySelector('#featured-viewer'), S.data.products[0], false);
-  if (page === 'products') document.querySelectorAll('.card').forEach((card, i) => {
-    card.classList.add('product-card');
-    const image = card.querySelector('img'), target = document.createElement('div');
-    image.replaceWith(target); mount(target, S.data.products[i], false);
+  // The catalogue stays a consistent set of SVG illustrations, not ten live stages.
+  document.querySelectorAll('.grid .card').forEach((card,index)=>{
+    const p=S.data.products[index];if(!p)return;
+    const row=document.createElement('span');row.className='swatches';row.setAttribute('role','img');row.setAttribute('aria-label','概念配色：'+p.colors.join('、'));
+    for(const name of p.colors){const dot=document.createElement('span');dot.className='swatch-dot';dot.style.setProperty('--swatch',S.swatches[name]||'var(--chip)');dot.title=name;dot.setAttribute('aria-hidden','true');row.append(dot);}card.querySelector('a').append(row);
   });
   if (page === 'product-detail') {
     const p = S.data.products.find(p => p.id === new URLSearchParams(location.search).get('id'));
     if (p) { const image = document.querySelector('.detail img'), target = document.createElement('div'); image.replaceWith(target); const v = mount(target, p);
       const label = document.createElement('label'); label.textContent = '模型配色（仅预览）';
-      const select = document.createElement('select');
-      for (const [name, value] of [['苔绿', '#5A6B4E'], ['暖砂', '#B08968']]) { const option = new Option(name, value); select.add(option); }
-      select.onchange = () => v.setColor(select.value); label.append(select); target.append(label);
+      const select = document.createElement('select');select.className='swatch-select';
+      for (const [name, value] of Object.entries(S.swatches)) { const option = new Option(name, value); select.add(option); }
+      select.value=S.swatches[p.colors.includes('豆绿')?'豆绿':p.colors[0]]||Object.values(S.swatches)[0];v.setColor(select.value);select.onchange = () => v.setColor(select.value); label.append(select); (document.querySelector('#product-options')||target).append(label);
       const turn = document.createElement('button'); turn.type = 'button'; turn.textContent = '切换观察角度'; let angle = Math.PI / 4;
       turn.onclick = () => { angle = (angle + Math.PI / 4) % (Math.PI * 2); v.rotateTo(angle); }; target.append(turn);
       const reset = document.createElement('button'); reset.type='button'; reset.textContent='重置视角';
-      reset.onclick=()=>{angle=Math.PI/4;v.reset();}; target.append(reset);
+      reset.onclick=()=>{angle=Math.PI/4;v.reset();}; target.append(reset);target.classList.add('detail-viewer');
     }
   }
   document.querySelectorAll('.collection .card').forEach(card => card.classList.add('product-card'));

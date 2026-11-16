@@ -19,7 +19,7 @@ function releaseObject(root) {
 function walker(color) {
   const group = new THREE.Group();
   const frame = new THREE.MeshStandardMaterial({ color, metalness: .55, roughness: .36 });
-  const rubber = new THREE.MeshStandardMaterial({ color: '#282922', roughness: .85 });
+  const rubber = new THREE.MeshStandardMaterial({ color: '#1C1B18', roughness: .85 });
   function bar(a, b, radius = .035, material = frame) {
     const start = new THREE.Vector3(...a), end = new THREE.Vector3(...b);
     const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, start.distanceTo(end), 12), material);
@@ -73,7 +73,7 @@ export function createViewer(canvas, modelPath, options = {}) {
       controls.maxPolarAngle = Math.PI / 2; controls.enablePan = false; controls.enableZoom = options.interactive !== false;
       controls.minDistance = 2; controls.maxDistance = 6; controls.autoRotate = false;
       controls.enableRotate = options.interactive !== false; controls.update(); controls.saveState(); controls.addEventListener('change',requestDraw);
-      scene.add(new THREE.HemisphereLight(0xffffff, 0x6b6a63, 3));
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x6B6A63, 3));
       const light = new THREE.DirectionalLight(0xffffff, 4); light.position.set(3, 4, 3); scene.add(light);
       resize = new ResizeObserver(() => {
         if (!renderer) return;

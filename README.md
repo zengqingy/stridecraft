@@ -1,65 +1,105 @@
-# Stridecraft 静态产品展示
+# Stridecraft 网站使用说明
 
-纯 HTML / CSS / JS，8 个页面，无安装、构建或服务器依赖。入口为 index.html。
+这是纯 HTML / CSS / JavaScript 的静态网站：无需安装依赖、构建或运行服务器。共有首页、产品、详情、理念、服务、常见问题、咨询和后台八页。
 
-## 初学者使用步骤
+当前内容是概念演示。产品线稿、模型、价格和参数不代表已确认的销售资料。
 
-1. 打开 index.html 浏览；管理入口在每页页脚。
-2. admin.html 默认口令为 8888。口令仅是演示门禁，可从源代码看到，不保护数据。
-3. 产品标签中编辑 JSON 里的文字后保存，刷新产品列表和对应详情页查看结果。保留字段名称、引号和逗号。
-4. 图片标签可上传图片或替换地址；本地上传存入 IndexedDB。
-5. 预订购买页提交后，在同一浏览器的管理页查看名单。不会发送邮件或同步给商家。
-6. 备份标签导出包含图片的 JSON；导入会替换本机数据。导出必须能读取远程图片，否则会提示失败，不导出不完整文件。
+## 1. 通过 GitHub Pages 预览
 
-数据保存在 localStorage 的 stridecraft_site_v1。管理登录保存在 sessionStorage。所有页面须处于相同站点来源；浏览器对直接打开 file:// 文件的存储和读取规则不同。发布到静态托管（例如 GitHub Pages）可获得一致的同源存储行为。本项目不包含服务器。清除浏览器数据会丢失咨询与上传图片，请先备份。
+1. 打开仓库：<https://github.com/zengqingy/stridecraft>。
+2. 进入 **Settings → Pages**。
+3. 在 **Build and deployment** 中选择 **Deploy from a branch**。
+4. Branch 选择 **main**，目录选择 **/(root)**，点击 **Save**。
+5. 等待 Pages 部署完成，在 Pages 设置页点击实际显示的访问地址。
 
-网站文字、价格、产品线稿及规格为演示内容，无医疗、认证或真实评价声明。产品尚未提供 GLB，Phase 2 已使用 Three.js 基础几何体显示概念助行器，并在画布后保留 SVG poster；GLB 加载失败或 WebGL 不可用时显示 poster。
+默认项目地址应为 <https://zengqingy.github.io/stridecraft/>。本次只推送代码，没有代你开启 Pages，也没有验证该线上地址。若你设置过自定义域名，以设置页给出的地址为准。
 
-图片完整清单见 [IMAGE-SLOTS.md](IMAGE-SLOTS.md)。开发约定见 [AGENTS.md](AGENTS.md)。
+以后推送到 main，Pages 会重新部署。若设置选项不可用，请先检查仓库权限、可见性与 GitHub 套餐对 Pages 的支持。
 
-## 验证记录
+直接双击 index.html 可以粗看页面，但部分浏览器会限制本地文件的模块、存储或图片读取。建议用 Pages 检查完整功能。
 
-使用 Chromium / Playwright 浏览器请求拦截读取本地文件（未启动本地服务器），同一测试来源运行八页：
+## 2. 进入后台
 
-- 八页所有已渲染图片 complete 且 naturalWidth > 0，无空 src、无未解决的损坏图片；远程不可用时使用 SVG 回退。
-- 后台修改第一款产品名称后，产品列表和详情页均显示新名称。
-- 表单提交测试咨询后，后台名单出现对应记录。
-- 本地 SVG 与 IndexedDB 上传图均嵌入备份，并成功恢复为 IndexedDB 引用。测试使用本地氛围图替身；远程氛围图导出依赖目标站点允许跨域读取。
-- 三个 JS 文件通过 node --check；无浏览器未捕获异常。
+部署后打开 <https://zengqingy.github.io/stridecraft/admin.html>，或点击任意页面页脚的“网站管理”。
 
-测试来源的演示改名与咨询已清理；测试浏览器为独立临时环境。未验证 file:// 模式（环境浏览器策略禁止），未部署 GitHub Pages。
+默认口令：**8888**。登录状态保存在 sessionStorage。
 
-## Phase 2：3D 与滚动叙事
+这个口令只是演示门禁，不能保护公开网站或客户资料。后台修改只保存在**当前浏览器、当前站点来源**，不会自动写回 GitHub，也不会同步到其他设备。换域名、换浏览器或清除网站数据，都可能看不到原记录。
 
-首页顺序：全屏 Hero → 三步固定滚动 3D → 10 款产品网格 → 理念 → 页尾咨询 CTA。桌面模型由正面转到 45°、90°；手机与减少动态效果模式固定 45°，不固定滚动、不使用擦洗。减少动态效果模式也跳过 Hero 与卡片动画。
+咨询表单也只保存到当前浏览器：不会发给商家、不会发邮件、不收款。请勿把它当作正式收单系统。
 
-`src/js/viewer.js` 导出 `createViewer(canvas, modelPath, options)`，返回 `rotateTo(radians)`、`setColor(cssColor)` 与 `dispose()`。可选参数 angle、color、interactive。距离视口 200px 内初始化；离视口 900px 外释放，列表最多三个活跃 WebGL 上下文。被回收的画布保留 SVG，下一次进入观察区域时可重新初始化。详情页支持拖动、配色和按钮切换角度。GLB 路径继续来自原有 model 字段，数据形状与后台逻辑未改变。
+## 3. 修改文字与添加产品
 
-运行库固定版本随 src/vendor 保存，不需要安装依赖。字体使用 Google Fonts 的 Noto Serif SC / Noto Sans SC，网络不可用时使用系统回退字体。
+先在“备份”标签导出备份，再修改资料。
 
-开发验证：已有 Playwright 与 Chromium 的环境中执行 `node tests/phase2.cjs`。测试通过浏览器拦截响应读取本地文件，不启动服务器；测试桌面固定、手机无固定、减少动态效果、基础几何体、GLB 404 回退、WebGL 不可用、三个上下文上限，以及后台改名/咨询回归。测试没有实际生产 GLB；未来真实模型还需检查材质、比例与外部纹理。store.js 与 src/admin.js 保持原样。
+- **文案**：编辑 JSON 的文字，保留字段名、引号和逗号，再保存。服务内容也从此处进入编辑。
+- **产品**：修改名称、描述、价格、要点和规格，保存后刷新产品列表与详情页。
+- 首页主标题取产品数组中第一款的 name；文案中的 headline 是辅助品牌句。
 
-## Phase 3：视觉与无障碍
+添加产品时，在“产品”标签复制一个完整对象，放入数组中，并在相邻对象间加逗号。每个 id 必须唯一。示例：
 
-- 指定 liquid-glass 配方仅用于粘性导航、产品卡片悬停/键盘聚焦浮层、咨询表单卡片。Firefox/Safari 与不支持 backdrop-filter 的浏览器使用指定不透明背景回退。
-- 三类原创 Lottie：折叠示意、咨询保存、空咨询名单。每个 JSON 小于 1KB，静态 SVG 回退均小于 250B。播放器为固定版本 @lottiefiles/dotlottie-web@0.44.0，经 jsDelivr CDN 按视口 200px 懒加载，使用 Canvas；播放器与 WASM 本身不计入动画素材大小。关闭屏幕外播放，不循环播放。
-- 减少动态效果时不请求 Lottie CDN、不自动播放；运行时开启该偏好会销毁播放器并显示 SVG。GSAP 显示最终状态、无固定滚动，3D 无自动旋转。所有三维视图按需重绘，不持续运行渲染循环。
-- 详情页支持拖动、双指缩放（相机距离 2–6）、双击/双触重置；另有键盘可用的观察角度与重置按钮。非详情画布保留竖向触摸滚动。画布有可访问名称与相邻说明。
-- 所有交互元素使用 2px #5A6B4E 焦点框，偏移 3px；原生 details/summary 支持 Enter/Space。后台标签补齐 tabpanel 关系和方向键/Home/End 操作，存储与门禁逻辑未修改。非 Hero 图片懒加载。
-
-### 实测结果与范围
-
-Chromium / axe-core 4.10.3：八页 WCAG 2/2.1 A、AA 扫描零违规；另检查登录后后台标签。手动脚本覆盖键盘折叠面板、后台方向键、双指缩放、双击/双触重置、减少动态效果、三类状态图与 Phase 2 回归。
-
-Lighthouse 12.8.2 首页移动端模拟：**Performance 94，Accessibility 100**。报告：[HTML](reports/lighthouse-phase3.html)、[指标摘要](reports/phase3-summary.json)。使用浏览器响应拦截读取仓库文件，无本地应用服务器；这不是已部署网站的生产基准。当前云浏览器的 Google Fonts 连接失败、CDN 证书不被信任，因此评分使用回退字体。未关闭 TLS 校验。
-
-为验证实际 Lottie 播放，通过正常 TLS 校验下载同版本 CDN JS/WASM，再由测试拦截提供这些原始字节。三类动画的实际播放与减少动态效果静态回退均测试；环境中的浏览器直连 CDN 仍失败，部署后需确认目标网络可访问 CDN。没有网络时仍可使用 SVG 与文字反馈。
-
-开发测试（测试工具独立于站点，无站点安装/构建步骤）：
-
-```sh
-AXE_PATH=/path/to/axe-core/axe.min.js CDN_ASSET_DIR=/path/to/verified-cdn-files node tests/phase3.cjs
-LIGHTHOUSE_MODULE=/path/to/lighthouse/core/index.js node tests/lighthouse.cjs
+```json
+{
+  "id": "walker-11",
+  "name": "新款概念",
+  "subtitle": "助行器概念系列 · 演示产品",
+  "price": 2000,
+  "desc": "概念展示，真实规格待确认。",
+  "points": ["设计要点待确认"],
+  "specs": {"状态": "概念演示", "尺寸": "待确认"},
+  "colors": ["米白", "豆绿", "暖驼"],
+  "model": "",
+  "imageSlots": {"main": "assets/img/products/walker-01.svg"}
+}
 ```
 
-CDN_ASSET_DIR 可选；提供时目录应含从固定 CDN 通过正常 TLS 校验取得的 index.js 和 dotlottie-player.wasm。测试需已有 Playwright、Chromium；Lighthouse 测试另需 Lighthouse。测试用来源与数据为独立临时浏览器，不修改真实用户数据。
+示例价格仅用于演示，发布前请填写你确认过的价格。可先复用现有线稿；然后在“图片”标签上传自己的图片，或填写 HTTPS 图片地址。
+
+内置展示色：米白 `#EDE8DD`、豆绿 `#8A9A7B`、暖驼 `#C4A882`。colors 仍是名称字符串数组。旧浏览器数据不会自动改名；需要在后台手动更新。未知色名显示中性圆点。
+
+**让所有访客看到修改**：后台保存不等于网站发布。需要由开发者把确认后的产品资料更新到 src/js/store.js 的 defaults 中，提交并推送。图片上传到 IndexedDB 也仅在本机；正式公共图片应放进仓库或可访问的图片服务。
+
+## 4. 替换 GLB 模型
+
+1. 在 GitHub 仓库中创建或上传到 `assets/models/`，例如 `assets/models/walker-11.glb`。
+2. 建议使用材质和纹理都内嵌的 GLB，并在上传前优化体积。
+3. 在后台该产品的 model 字段填入 `assets/models/walker-11.glb`，保存并刷新详情页。
+4. 检查模型比例、方向、材质与手机性能。详情页可拖动、双指缩放、双击或双触重置，也有键盘可用按钮。
+5. 要让所有访客使用它，还需把同一路径写入仓库默认产品数据并推送。
+
+路径相对网站根目录，**不要加开头的 /**，否则 GitHub 项目 Pages 可能找错路径。默认没有 GLB 时显示程序化概念助行器；GLB 加载失败或 WebGL 不可用时显示 SVG。列表保持统一的静态 SVG，首页特色区和详情页才使用 3D。
+
+## 5. 图片与备份
+
+后台“图片”标签支持上传 PNG/JPEG/WebP/GIF（单张 8MB 内），或填写图片地址。上传图以 `idb:<id>` 引用保存在 IndexedDB。所有槽位见 [IMAGE-SLOTS.md](IMAGE-SLOTS.md)。
+
+**导出**：进入“备份”→“导出 JSON”，等待图片收集完成，保存下载文件。备份包含站点数据、咨询名单及图片内容，请妥善保管。
+
+**导入**：在“备份”选择之前导出的 JSON。导入会替换当前浏览器中的站点数据，内嵌图片会恢复到 IndexedDB。请在导入前再导出一份当前数据。
+
+外部图片必须能被浏览器跨域读取。读取失败时导出会明确报错，不会生成缺图备份；可以先在“图片”标签把该图改成本机上传图后重试。备份嵌入图片，但不嵌入 GLB；模型文件需另行保存在仓库。
+
+## 6. 常见问题排查
+
+| 问题 | 怎么处理 |
+|---|---|
+| Pages 显示 404 | 检查 main / root 设置、部署记录是否成功；确认地址带 /stridecraft/，不是账号主页。 |
+| 推送后还是旧页面 | 等待部署成功后刷新；检查实际网址。后台本地数据也可能覆盖新的默认资料，先导出备份，再用新的浏览器配置查看默认内容。 |
+| JSON 无法保存 | 检查英文双引号、逗号、完整字段和唯一 id。不要在聊天或不可信工具中粘贴含个人信息的备份。 |
+| 另一个设备没有修改/咨询 | 这是本机存储设计；用备份转移演示内容。真实跨设备咨询需要另外开发受保护的后端。 |
+| 产品图或模型不显示 | 检查文件名大小写、相对路径、文件是否已推送；查看回退 SVG。真实 GLB 还需检查纹理路径。 |
+| 配色只显示旧名称 | 已有 localStorage 不会被默认数据覆盖；在后台更新 colors，或先备份，再用干净的浏览器查看。 |
+| 字体或小动画不加载 | Google Fonts / Lottie CDN 可能被网络或证书策略限制；系统字体、静态 SVG 和文字反馈仍可用。不要关闭 TLS 校验。 |
+| 保存失败 | 检查存储空间与浏览器隐私设置；备份后移除不需要的大图。 |
+| 动画没有播放 | 检查设备是否开启“减少动态效果”。该模式显示最终文字、取消固定滚动并使用静态状态图。 |
+
+## 7. 开发与检查记录
+
+- src/js/store.js：默认资料、渲染器、存储及备份。
+- src/js/site.js：页面内容和咨询交互；src/js/experience.js / viewer.js：产品展示。
+- src/js/polish.js：装饰状态与键盘增强；src/admin.js：后台逻辑。
+- src/css/site.css：统一令牌、排版、间距与响应式。
+
+本次视觉诊断、参考原则与边界见 [docs/TASTE-NOTES.md](docs/TASTE-NOTES.md)。颜色审计与验证结果见 reports 下对应文件。历史 [Lighthouse 报告](reports/lighthouse-phase3.html) 来自 Phase 3，不代表本轮或线上性能。
+
+网站本身不依赖测试工具。开发验证需要另备 Playwright/Chromium；axe 与 Lighthouse 也只用于测试。自动化通过浏览器请求拦截读取静态文件，不启动应用服务器。store.js 的持久化结构、localStorage 键和后台逻辑保持不变。

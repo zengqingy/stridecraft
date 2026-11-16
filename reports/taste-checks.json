@@ -1,0 +1,104 @@
+{
+  "palette": "PASS",
+  "responsive": [
+    {
+      "page": "index.html",
+      "width": 1440,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "products.html",
+      "width": 1440,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "product-detail.html?id=walker-01",
+      "width": 1440,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "index.html",
+      "width": 1024,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "products.html",
+      "width": 1024,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "product-detail.html?id=walker-01",
+      "width": 1024,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "index.html",
+      "width": 768,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "products.html",
+      "width": 768,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "product-detail.html?id=walker-01",
+      "width": 768,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "index.html",
+      "width": 390,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "products.html",
+      "width": 390,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "product-detail.html?id=walker-01",
+      "width": 390,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "index.html",
+      "width": 320,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "products.html",
+      "width": 320,
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "page": "product-detail.html?id=walker-01",
+      "width": 320,
+      "overflow": false,
+      "brokenImages": 0
+    }
+  ],
+  "persistence": "PASS",
+  "excluded": "Third-party skill/vendor assets and historical reports are reference material, not application palette.",
+  "axe": "PASS: 15 responsive page/width combinations; WCAG 2/2.1 A/AA",
+  "regression": [
+    "Phase 2 viewer, context cap fixture, mobile/reduced motion, admin rename and booking: PASS",
+    "Phase 3 eight-page axe, Lottie, gestures, keyboard: PASS",
+    "All eight pages image decode, embedded-image backup restore: PASS"
+  ],
+  "skillGate": "Not run: skill browser scripts start a local HTTP server, prohibited by project instructions."
+}
