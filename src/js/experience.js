@@ -1,4 +1,12 @@
-import {createViewer} from './viewer.js';
+let viewerModule;
+function lazyViewer(canvas, path, options) {
+  let viewer, disposed=false; const pending={angle:options.angle,color:null};
+  const watch=new IntersectionObserver(async entries=>{
+    if(!entries.some(e=>e.isIntersecting))return; watch.disconnect();
+    try {viewerModule ||= import('./viewer.js');const {createViewer}=await viewerModule;if(disposed)return;viewer=createViewer(canvas,path,{...options,angle:pending.angle});if(pending.color)viewer.setColor(pending.color);}catch{canvas.parentElement.dataset.viewerState='fallback';}
+  },{rootMargin:'200px'});watch.observe(canvas);
+  return {rotateTo(a){pending.angle=a;viewer?.rotateTo(a)},setColor(c){pending.color=c;viewer?.setColor(c)},reset(){pending.angle=options.angle;viewer?.reset()},dispose(){disposed=true;watch.disconnect();viewer?.dispose()}};
+}
 const viewers = [], S = window.Store, page = document.body.dataset.page;
 function mount(container, product, interactive = true) {
   const stage = document.createElement('div'); stage.className = 'viewer-stage';
@@ -7,7 +15,13 @@ function mount(container, product, interactive = true) {
   container.replaceChildren(stage);
   const canvas = stage.querySelector('canvas');
   canvas.setAttribute('role', 'img');
-  const viewer = createViewer(canvas, product.model, {angle: Math.PI / 4, interactive});
+  canvas.setAttribute('aria-label',interactive?'可拖动的产品三维示意':'产品三维概念示意');
+  canvas.tabIndex = interactive ? 0 : -1;
+  const description = document.createElement('p'); description.className = 'viewer-description muted';
+  description.id = 'viewer-description-' + document.querySelectorAll('.viewer-description').length;
+  description.textContent = interactive ? '概念三维示意：拖动旋转，双指缩放，双击或双触重置。也可使用下方按钮观察与重置；不代表实物规格。' : '概念助行器三维示意；不可交互，不代表实物规格。无法显示三维时保留产品线稿。';
+  canvas.setAttribute('aria-describedby', description.id); container.append(description);
+  const viewer = lazyViewer(canvas, product.model, {angle: Math.PI / 4, interactive});
   viewers.push(viewer); S.hydrate(stage);
   return viewer;
 }
@@ -29,6 +43,8 @@ function setup() {
       select.onchange = () => v.setColor(select.value); label.append(select); target.append(label);
       const turn = document.createElement('button'); turn.type = 'button'; turn.textContent = '切换观察角度'; let angle = Math.PI / 4;
       turn.onclick = () => { angle = (angle + Math.PI / 4) % (Math.PI * 2); v.rotateTo(angle); }; target.append(turn);
+      const reset = document.createElement('button'); reset.type='button'; reset.textContent='重置视角';
+      reset.onclick=()=>{angle=Math.PI/4;v.reset();}; target.append(reset);
     }
   }
   document.querySelectorAll('.collection .card').forEach(card => card.classList.add('product-card'));
@@ -49,8 +65,8 @@ function setup() {
     media.add('(min-width: 801px) and (prefers-reduced-motion: no-preference)', () => {
       const rotation = {angle: 0}; featured.rotateTo(0);
       const distance = () => innerHeight * 1.8;
-      ScrollTrigger.create({trigger: '.featured', start: 'top 40px', end: () => '+=' + distance(), pin: '.featured-visual', pinSpacing: false, invalidateOnRefresh: true});
-      const steps = gsap.timeline({scrollTrigger: {trigger: '.featured', start: 'top 40px', end: () => '+=' + distance(), scrub: 1, invalidateOnRefresh: true}});
+      ScrollTrigger.create({trigger: '.featured', start: () => 'top '+(document.querySelector('header').offsetHeight+16)+'px', end: () => '+=' + distance(), pin: '.featured-visual', pinSpacing: false, invalidateOnRefresh: true});
+      const steps = gsap.timeline({scrollTrigger: {trigger: '.featured', start: () => 'top '+(document.querySelector('header').offsetHeight+16)+'px', end: () => '+=' + distance(), scrub: 1, invalidateOnRefresh: true}});
       // Three equal 60vh steps: front, 3/4, side. Timeline tweens retain one-second durations.
       for (const angle of [0, Math.PI / 4, Math.PI / 2]) steps.to(rotation, {angle, duration: 1, ease: 'none', onUpdate: () => featured.rotateTo(rotation.angle)});
       return () => featured.rotateTo(Math.PI / 4);

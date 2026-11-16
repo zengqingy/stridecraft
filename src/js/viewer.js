@@ -49,9 +49,10 @@ export function createViewer(canvas, modelPath, options = {}) {
   let renderer, scene, camera, controls, model, resize, frame, dead = false, generation = 0;
   let angle = options.angle ?? Math.PI / 4, color = options.color ?? '#5A6B4E';
   const stage = canvas.parentElement;
+  function requestDraw() { if (!renderer || frame) return; frame=requestAnimationFrame(()=>{frame=0;if(renderer)renderer.render(scene,camera);}); }
   function state(value) { stage.dataset.viewerState = value; }
   function suspend() {
-    generation++; cancelAnimationFrame(frame); resize?.disconnect(); controls?.dispose();
+    generation++; cancelAnimationFrame(frame); frame=0; resize?.disconnect(); controls?.dispose();
     releaseObject(scene); renderer?.dispose(); renderer?.forceContextLoss();
     renderer = scene = camera = controls = model = null;
     canvas.style.opacity = '0'; active.delete(api); state('poster');
@@ -66,15 +67,18 @@ export function createViewer(canvas, modelPath, options = {}) {
       scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(35, 1, .01, 100);
       camera.position.set(0, 1, 3.5);
       controls = new OrbitControls(camera, canvas);
+      controls.enabled = options.interactive !== false;
+      canvas.style.touchAction = options.interactive === false ? 'pan-y' : 'none';
       controls.target.set(0, 0, 0); controls.minPolarAngle = Math.PI / 3;
-      controls.maxPolarAngle = Math.PI / 2; controls.enablePan = false; controls.enableZoom = false;
-      controls.enableRotate = options.interactive !== false; controls.update();
+      controls.maxPolarAngle = Math.PI / 2; controls.enablePan = false; controls.enableZoom = options.interactive !== false;
+      controls.minDistance = 2; controls.maxDistance = 6; controls.autoRotate = false;
+      controls.enableRotate = options.interactive !== false; controls.update(); controls.saveState(); controls.addEventListener('change',requestDraw);
       scene.add(new THREE.HemisphereLight(0xffffff, 0x6b6a63, 3));
       const light = new THREE.DirectionalLight(0xffffff, 4); light.position.set(3, 4, 3); scene.add(light);
       resize = new ResizeObserver(() => {
         if (!renderer) return;
         const {width, height} = stage.getBoundingClientRect();
-        renderer.setSize(width, height, false); camera.aspect = width / Math.max(height, 1); camera.updateProjectionMatrix();
+        renderer.setSize(width, height, false); camera.aspect = width / Math.max(height, 1); camera.updateProjectionMatrix(); requestDraw();
       }); resize.observe(stage);
       if (modelPath) {
         const gltf = await new GLTFLoader().loadAsync(modelPath);
@@ -87,22 +91,46 @@ export function createViewer(canvas, modelPath, options = {}) {
       } else model = walker(color);
       scene.add(model); model.rotation.y = angle;
       canvas.style.opacity = '1'; state(modelPath ? 'glb' : 'procedural');
-      function draw() { if (!renderer) return; renderer.render(scene, camera); frame = requestAnimationFrame(draw); }
-      draw();
+      requestDraw();
     } catch (error) { if (token === generation) { suspend(); state('fallback'); } }
   }
   const near = new IntersectionObserver(entries => { entries.forEach(entry => { if (entry.isIntersecting) init(); }); }, {rootMargin: '200px'});
   const far = new IntersectionObserver(entries => { entries.forEach(entry => { if (!entry.isIntersecting && renderer) suspend(); }); }, {rootMargin: '900px'});
   const api = {
-    rotateTo(value) { angle = value; if (model) model.rotation.y = value; },
-    setColor(value) { color = value; model?.traverse(node => { for (const mat of [].concat(node.material || [])) if (mat.metalness > .1) mat.color.set(value); }); },
+    rotateTo(value) { angle = value; if (model) model.rotation.y = value; requestDraw(); },
+    setColor(value) { color = value; model?.traverse(node => { for (const mat of [].concat(node.material || [])) if (mat.metalness > .1) mat.color.set(value); }); requestDraw(); },
+    reset() { angle = options.angle ?? Math.PI / 4; if (model) model.rotation.y = angle; controls?.reset(); requestDraw(); },
     suspend,
     dispose() { dead = true; near.disconnect(); far.disconnect(); suspend(); }
   };
+  // OrbitControls handles pinch; a short unmoved double touch resets without
+  // stealing pinch or drag. Mouse/pen use the native double-click event.
+  let touchStart, lastTap = 0;
+  const pointers = new Set();
+  const down = event => {
+    pointers.add(event.pointerId);
+    if (pointers.size > 1) { touchStart = null; lastTap = 0; }
+    else if (event.pointerType === 'touch') touchStart = {x:event.clientX,y:event.clientY,time:performance.now()};
+  };
+  const up = event => {
+    pointers.delete(event.pointerId);
+    if (event.pointerType !== 'touch' || !touchStart) return;
+    const now = performance.now();
+    if (now - touchStart.time < 300 && Math.hypot(event.clientX-touchStart.x,event.clientY-touchStart.y)<12) {
+      if (lastTap && now-lastTap<350) { api.reset(); lastTap=0; } else lastTap=now;
+    } else lastTap=0;
+    touchStart=null;
+  };
+  const cancel = event => {pointers.delete(event.pointerId);touchStart=null;lastTap=0;};
+  const doubleClick = () => api.reset();
+  if (options.interactive !== false) {
+    canvas.addEventListener('pointerdown',down); canvas.addEventListener('pointerup',up);
+    canvas.addEventListener('pointercancel',cancel); canvas.addEventListener('dblclick',doubleClick);
+  }
   const lost = event => { event.preventDefault(); if (renderer) suspend(); };
   canvas.addEventListener('webglcontextlost', lost);
   const dispose = api.dispose;
-  api.dispose = () => { canvas.removeEventListener('webglcontextlost', lost); dispose(); };
+  api.dispose = () => { canvas.removeEventListener('webglcontextlost', lost); canvas.removeEventListener('pointerdown',down); canvas.removeEventListener('pointerup',up); canvas.removeEventListener('pointercancel',cancel); canvas.removeEventListener('dblclick',doubleClick); dispose(); };
   canvas.style.opacity = '0'; state('poster'); near.observe(canvas); far.observe(canvas);
   return api;
 }

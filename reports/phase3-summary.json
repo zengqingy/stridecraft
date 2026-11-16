@@ -1,0 +1,17 @@
+{
+  "url": "https://stridecraft.test/index.html",
+  "lighthouseVersion": "12.8.2",
+  "fetchTime": "2026-11-16T11:56:06.559Z",
+  "scores": {
+    "performance": 94,
+    "accessibility": 100
+  },
+  "metrics": {
+    "first-contentful-paint": "2.3\u00a0s",
+    "largest-contentful-paint": "2.7\u00a0s",
+    "total-blocking-time": "60\u00a0ms",
+    "cumulative-layout-shift": "0",
+    "speed-index": "2.3\u00a0s"
+  },
+  "conditions": "Chromium mobile simulated throttling. Playwright intercepts static file responses; no local server. Environment blocks Google Fonts and browser CDN TLS; fallback fonts used. Not a deployed production benchmark."
+}

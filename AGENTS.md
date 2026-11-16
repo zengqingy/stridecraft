@@ -12,3 +12,4 @@
 - Keep navigation consistent; mark the active page with aria-current="page".
 - Validate image resolution, cross-page product edits, booking persistence, and embedded-image backups before completion.
 - Do not start a local server. Open static files directly for verification. Commit and push requested changes.
+- Phase 3 glass is restricted to sticky navigation, product hover overlays, and the enquiry form. Reduced motion must skip GSAP/pins/Lottie autoplay and preserve static fallbacks. Do not disable TLS verification to troubleshoot CDN access.
